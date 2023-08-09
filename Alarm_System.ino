@@ -17,6 +17,7 @@ for (int i = 0; i<6;i++)
 {
   pinMode(ledler[i],OUTPUT);
 }
+digitalWrite(ledler[5],HIGH);
 
 }
 
