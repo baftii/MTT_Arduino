@@ -1,0 +1,9 @@
+https://www.youtube.com/playlist?list=PLkhSl_0v_U0JEJOo26ejZG8VrK_6hhsja    ## Arduino Playlist Türkçe Başlangıç kısmı düz C atlanabilir
+
+https://www.youtube.com/watch?v=rop0W4QDOUI      ## Labirent Çözümü Algoritma
+
+https://www.youtube.com/watch?v=iBbUeJn4r9I    ## Çizgi izleyen robot 
+
+https://www.youtube.com/watch?v=zOByx3Izf5U    ## PID implementation
+
+https://www.youtube.com/watch?v=PdSDhdciSpE    ## Bahsettiğim robot süpürge videosu
