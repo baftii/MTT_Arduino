@@ -35,7 +35,7 @@ void loop() {
 
 void kalibrasyon(void){
   int checkSol = 0, checkSag = 1, firsttime = 1, time;
-  for(int i = 0; i < 8; i++)
+  for(int i = 0; i < SensorSize; i++)
   {
     minKal[i] = analogRead(i);
     maxKal[i] = analogRead(i);
