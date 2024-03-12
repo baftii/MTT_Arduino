@@ -181,6 +181,24 @@ void SagHareket(int hiz){
   digitalWrite(SolMotor2, LOW);
 }
 
+void ileri(int hiz){
+  analogWrite(SagMotorHiz, hiz);
+  digitalWrite(SagMotor1, HIGH);
+  digitalWrite(SagMotor2, LOW);
+  analogWrite(SolMotorHiz, hiz);
+  digitalWrite(SolMotor1, HIGH);
+  digitalWrite(SolMotor2, LOW);
+}
+
+void geri(int hiz){
+  analogWrite(SagMotorHiz, hiz);
+  digitalWrite(SagMotor1, LOW);
+  digitalWrite(SagMotor2, HIGH);
+  analogWrite(SolMotorHiz, hiz);
+  digitalWrite(SolMotor1, LOW);
+  digitalWrite(SolMotor2, HIGH);
+}
+
 void MotorDurdur(void){
   analogWrite(SagMotorHiz, 0);
   digitalWrite(SagMotor1, LOW);
