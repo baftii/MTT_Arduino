@@ -17,7 +17,13 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  while(!digitalRead(Button)){}
+  kalibrasyon();
+  delay(5000);
+
+  while(1){
+    
+  }
 
 }
 
