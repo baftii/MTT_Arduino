@@ -4,6 +4,8 @@
 #define SolMotor1 4
 #define SagMotor2 5
 #define SolMotor2 6
+#define TrigPin 7
+#define EchoPin 9
 
 #define SensorSize 8
 
@@ -208,4 +210,17 @@ void MotorDurdur(void){
   analogWrite(SolMotorHiz, 0);
   digitalWrite(SolMotor1, LOW);
   digitalWrite(SolMotor2, LOW);
+}
+
+double mesafeOlc(void){
+  digitalWrite(TrigPin, LOW);
+  delayMicroseconds(3);
+  digitalWrite(TrigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TrigPin, LOW);
+
+  double sure = pulseIn(EchoPin, HIGH);
+
+  double mesafe = (sure/2) * 0.0343;
+  return mesafe;
 }
