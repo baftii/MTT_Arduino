@@ -178,3 +178,12 @@ void SagHareket(int hiz){
   digitalWrite(SolMotor1, HIGH);
   digitalWrite(SolMotor2, LOW);
 }
+
+void MotorDurdur(void){
+  analogWrite(SagMotorHiz, 0);
+  digitalWrite(SagMotor1, LOW);
+  digitalWrite(SagMotor2, LOW);
+  analogWrite(SolMotorHiz, 0);
+  digitalWrite(SolMotor1, LOW);
+  digitalWrite(SolMotor2, LOW);
+}
