@@ -34,15 +34,17 @@ void loop() {
 // Kalibrasyon bittiğinde maksimum ve minimum değerlerin ortalamasını esik değere kaydetecektir.
 
 void kalibrasyon(void){
-  int checkSol = 0, checkSag = 1, firsttime = 1, time;
+  int checkSol = 0, checkSag = 1, firsttime = 1, time, maintime, firstloopcheck = 1;
   for(int i = 0; i < SensorSize; i++)
   {
     minKal[i] = analogRead(i);
     maxKal[i] = analogRead(i);
   }
 
-  for(int i = 0; i < 3000; i++){
-    if(i == 1){
+  maintime = millis();
+  while(millis() > (maintime + 5000)){
+    if(firstloopcheck == 1){
+      firstloopcheck = 0;
       time = millis();
     }
 
