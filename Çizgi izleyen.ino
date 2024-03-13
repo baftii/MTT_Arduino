@@ -11,6 +11,16 @@
 
 int minKal[SensorSize], maxKal[SensorSize], esik[SensorSize];
 
+int P, D, I, previousError, PIDvalue;
+
+int solHiz, sagHiz;
+
+int baslangicHiz = 150;
+
+float Kp = 0;
+float Kd = 0;
+float Ki = 0;
+
 void setup() {
   // put your setup code here, to run once:
 
@@ -22,11 +32,53 @@ void loop() {
   delay(5000);
 
   while(1){
-    
-  }
+    if(analogRead(1) < esik[1] && analogRead(8) > esik[8]){
+        YerindeSolHareket(255);
+    }
 
+    else if(analogRead(8) < esik[8] && analogRead(1) > esik[1]){
+        YerindeSagHareket(255);
+    }
+
+    else if(analogRead(5) < esik[5] || analogRead(4) < esik[4]){
+        Kp = 0.0006 * (1000 - (analogRead(5) + analogRead(4)) / 2);
+        Kd = 10 * Kp;
+        Ki = 0.00001;
+        cizgitakip();
+    }
+  }
 }
 
+void cizgitakip(void){
+    int error = (analogRead(6) - analogRead(3));
+
+    P = error;
+    I = I + error;
+    D = error - previousError;
+
+    PIDvalue = (Kp * P) + (Ki * I) + (Kd * D);
+    previousError = error;
+
+    solHiz = baslangicHiz - PIDvalue;
+    sagHiz = baslangicHiz + PIDvalue;
+
+    if(solHiz > 255){
+        solHiz = 255;
+    }
+    else if(solHiz < 0){
+        solHiz = 0;
+    }
+
+    if(sagHiz > 255){
+        sagHiz = 255;
+    }
+    else if(sagHiz < 0){
+        sagHiz = 0;
+    }
+
+    sagMotorIleri(sagHiz);
+    solMotorIleri(solHiz);
+}
 
 // Main Kalibrasyon Fonksiyonu
 // ***************************
@@ -57,7 +109,7 @@ void kalibrasyon(void){
     }
 
     if(firsttime == 1){
-      SolHareket(255);
+      YerindeSolHareket(255);
       maxminKalbComp(&maxKal[0], &minKal[0], 8);
       if(millis() > (time + 500)){
         firsttime = 0;
@@ -95,7 +147,7 @@ void kalibrasyon(void){
 // Sola dönüş hareketi yapmak.
 
 static void SolKalb(int hiz, int *SolCheck, int *SagCheck, int *sure){
-  SolHareket(hiz);
+  YerindeSolHareket(hiz);
   maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
   if(millis() > (sure + 1000)){
     *SolCheck = 0;
@@ -116,7 +168,7 @@ static void SolKalb(int hiz, int *SolCheck, int *SagCheck, int *sure){
 // Sağa dönüş hareketi yapmak.
 
 static void SagKalb(int hiz, int *SolCheck, int *SagCheck, int *sure){
-  SagHareket(hiz);
+  YerindeSagHareket(hiz);
   maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
   if(millis() > (sure + 1000)){
     *SolCheck = 1;
@@ -162,13 +214,9 @@ static void maxminKalbComp(int *max, int *min, int size){
 // Amaç
 // Parametre olarak alınan hızda yerinde sola dönme yapar
 
-void SolHareket(int hiz){
-  analogWrite(SagMotorHiz, hiz);
-  digitalWrite(SagMotor1, HIGH);
-  digitalWrite(SagMotor2, LOW);
-  analogWrite(SolMotorHiz, hiz);
-  digitalWrite(SolMotor1, LOW);
-  digitalWrite(SolMotor2, HIGH);
+void YerindeSolHareket(int hiz){
+  sagMotorIleri(hiz);
+  solMotorGeri(hiz);
 }
 
 // Sağ hareket Fonksiyonu
@@ -182,40 +230,48 @@ void SolHareket(int hiz){
 // Amaç
 // Parametre olarak alınan hızda yerinde sağa dönme yapar
 
-void SagHareket(int hiz){
-  analogWrite(SagMotorHiz, hiz);
-  digitalWrite(SagMotor1, LOW);
-  digitalWrite(SagMotor2, HIGH);
-  analogWrite(SolMotorHiz, hiz);
-  digitalWrite(SolMotor1, HIGH);
-  digitalWrite(SolMotor2, LOW);
+void YerindeSagHareket(int hiz){
+  sagMotorGeri(hiz);
+  solMotorIleri(hiz);
 }
 
 void ileri(int hiz){
-  analogWrite(SagMotorHiz, hiz);
-  digitalWrite(SagMotor1, HIGH);
-  digitalWrite(SagMotor2, LOW);
-  analogWrite(SolMotorHiz, hiz);
-  digitalWrite(SolMotor1, HIGH);
-  digitalWrite(SolMotor2, LOW);
+  sagMotorIleri(hiz);
+  solMotorIleri(hiz);
 }
 
 void geri(int hiz){
-  analogWrite(SagMotorHiz, hiz);
-  digitalWrite(SagMotor1, LOW);
-  digitalWrite(SagMotor2, HIGH);
-  analogWrite(SolMotorHiz, hiz);
-  digitalWrite(SolMotor1, LOW);
-  digitalWrite(SolMotor2, HIGH);
+  sagMotorGeri(hiz);
+  solMotorGeri(hiz);
 }
 
 void MotorDurdur(void){
-  analogWrite(SagMotorHiz, 0);
-  digitalWrite(SagMotor1, LOW);
-  digitalWrite(SagMotor2, LOW);
-  analogWrite(SolMotorHiz, 0);
-  digitalWrite(SolMotor1, LOW);
-  digitalWrite(SolMotor2, LOW);
+  sagMotorIleri(0);
+  solMotorIleri(0);
+}
+
+void sagMotorIleri(int hiz){
+    analogWrite(SagMotorHiz, hiz);
+    digitalWrite(SagMotor1, LOW);
+    digitalWrite(SagMotor2, HIGH;
+}
+
+void sagMotorGeri(int hiz){
+    analogWrite(SagMotorHiz, hiz);
+    digitalWrite(SagMotor1, HIGH);
+    digitalWrite(SagMotor2, LOW;
+}
+
+void solMotorIleri(int hiz){
+    analogWrite(SolMotorHiz, hiz);
+    digitalWrite(SolMotor1, LOW);
+    digitalWrite(SolMotor2, HIGH;
+}
+
+void solMotorGeri(int hiz){
+    analogWrite(SolMotorHiz, hiz);
+    digitalWrite(SolMotor1, HIGH);
+    digitalWrite(SolMotor2, LOW;
 }
 
 double mesafeOlc(void){
