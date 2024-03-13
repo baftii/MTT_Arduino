@@ -39,28 +39,34 @@ void loop()
         if (mesafeOlc() < 30)
         {
             MotorDurdur();
+            delay(500);
         }
 
         else
         {
-            if (analogRead(1) < esik[1] && analogRead(8) > esik[8])
-            {
-                YerindeSolHareket(255);
-            }
-
-            else if (analogRead(8) < esik[8] && analogRead(1) > esik[1])
-            {
-                YerindeSagHareket(255);
-            }
-
-            else if (analogRead(5) < esik[5] || analogRead(4) < esik[4])
-            {
-                Kp = 0.0006 * (1000 - (analogRead(5) + analogRead(4)) / 2);
-                Kd = 10 * Kp;
-                Ki = 0.00001;
-                cizgitakip();
-            }
+            genelCizgiTakip();
         }
+    }
+}
+
+void genelCizgiTakip(void)
+{
+    if (analogRead(1) < esik[1] && analogRead(8) > esik[8])
+    {
+        YerindeSolHareket(255);
+    }
+
+    else if (analogRead(8) < esik[8] && analogRead(1) > esik[1])
+    {
+        YerindeSagHareket(255);
+    }
+
+    else if (analogRead(5) < esik[5] || analogRead(4) < esik[4])
+    {
+        Kp = 0.0006 * (1000 - (analogRead(5) + analogRead(4)) / 2);
+        Kd = 10 * Kp;
+        Ki = 0.00001;
+        cizgitakip();
     }
 }
 
