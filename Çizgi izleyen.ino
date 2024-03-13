@@ -7,6 +7,8 @@
 #define TrigPin 7
 #define EchoPin 9
 
+#define Button 11
+
 #define SensorSize 8
 
 int minKal[SensorSize], maxKal[SensorSize], esik[SensorSize];
@@ -302,28 +304,28 @@ void sagMotorIleri(int hiz)
 {
     analogWrite(SagMotorHiz, hiz);
     digitalWrite(SagMotor1, LOW);
-    digitalWrite(SagMotor2, HIGH;
+    digitalWrite(SagMotor2, HIGH);
 }
 
 void sagMotorGeri(int hiz)
 {
     analogWrite(SagMotorHiz, hiz);
     digitalWrite(SagMotor1, HIGH);
-    digitalWrite(SagMotor2, LOW;
+    digitalWrite(SagMotor2, LOW);
 }
 
 void solMotorIleri(int hiz)
 {
     analogWrite(SolMotorHiz, hiz);
     digitalWrite(SolMotor1, LOW);
-    digitalWrite(SolMotor2, HIGH;
+    digitalWrite(SolMotor2, HIGH);
 }
 
 void solMotorGeri(int hiz)
 {
     analogWrite(SolMotorHiz, hiz);
     digitalWrite(SolMotor1, HIGH);
-    digitalWrite(SolMotor2, LOW;
+    digitalWrite(SolMotor2, LOW);
 }
 
 double mesafeOlc(void)
