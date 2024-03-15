@@ -11,11 +11,22 @@
 
 #define SensorSize 8
 
+#define TRUE 1
+#define FALSE 0
+
 int minKal[SensorSize], maxKal[SensorSize], esik[SensorSize];
 
 int P, D, I, previousError, PIDvalue;
 
 int solHiz, sagHiz;
+
+int beyazcizgicount = 0;
+int beyazcizgitime = 0;
+
+int motorstopcount = 0;
+int mesafe20count = 0;
+
+int parklockcheck = 0;
 
 int baslangicHiz = 150;
 
@@ -38,14 +49,29 @@ void loop()
 
     while (1)
     {
-        if (mesafeOlc() < 30)
+        if((beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8))
+        && (millis() > beyazcizgitime + 750)){
+            beyazcizgicount++;
+            beyazcizgitime = millis();
+        }
+
+        if (mesafeOlc() < 20)
         {
-            MotorDurdur();
-            delay(500);
+            if(mesafe20count > 10){
+                MotorDurdur();
+            }
+            mesafe20count++;
+            if(motorstopcount == 0 && mesafe20count > 40){
+                trafikLambasiGecis();
+            }
+            else if(motorstopcount == 1 && mesafe20count > 30){
+                hareketsizEngelGecis();
+            }
         }
 
         else
         {
+            mesafe20count = 0;
             genelCizgiTakip();
         }
     }
@@ -53,22 +79,56 @@ void loop()
 
 void genelCizgiTakip(void)
 {
-    if (analogRead(1) < esik[1] && analogRead(8) > esik[8])
+    // Ani sol dönüş
+    if (beyazUstunde(1) && siyahUstunde(8))
     {
         YerindeSolHareket(255);
     }
 
-    else if (analogRead(8) < esik[8] && analogRead(1) > esik[1])
+    // Ani sağ dönüş
+    else if (beyazUstunde(8) && siyahUstunde(1))
     {
         YerindeSagHareket(255);
     }
 
-    else if (analogRead(5) < esik[5] || analogRead(4) < esik[4])
+    // 2. Aşama sağ sapma
+    else if ((beyazUstunde(6) && beyazUstunde(3)) && beyazcizgicount == 1 && (siyahUstunde(5) || siyahUstunde(4))){
+        YerindeSagHareket(150);
+        delay(300);
+    }
+
+    // 3. Aşama sol sapma
+    else if((beyazUstunde(6) && beyazUstunde(5) && beyazUstunde(4)) && beyazcizgicount == 2 && (siyahUstunde(2) && siyahUstunde(1))){
+        YerindeSolHareket(150);
+        delay(300);
+    }
+
+    // 3. Aşama park durumu
+    else if(beyazcizgicount == 4 && parklockcheck == 0){
+        MotorDurdur();
+        geri(100);
+        delay(150);
+        while(!digitalRead(Button))
+        {
+
+        }
+        delay(500);
+        parklockcheck = 1;
+    }
+
+    // Normal çizgi takip
+    else if (beyazUstunde(5) || beyazUstunde(4))
     {
         Kp = 0.0006 * (1000 - (analogRead(5) + analogRead(4)) / 2);
         Kd = 10 * Kp;
         Ki = 0.00001;
         cizgitakip();
+    }
+
+    // Kaybolma
+    else if(siyahUstunde(1) && siyahUstunde(2) && siyahUstunde(3) && siyahUstunde(4) && siyahUstunde(5) && siyahUstunde(6) && siyahUstunde(7) && siyahUstunde(8))
+    {
+        YerindeSagHareket(255);
     }
 }
 
@@ -282,6 +342,26 @@ void YerindeSagHareket(int hiz)
     solMotorIleri(hiz);
 }
 
+void hareketsizEngelGecis(){
+    YerindeSolHareket(255);
+    if(mesafeOlc() > 20){
+        delay(100);
+    }
+    
+    while(siyahUstunde(1) && siyahUstunde(2) && siyahUstunde(3) && siyahUstunde(4) && siyahUstunde(5) && siyahUstunde(6) && siyahUstunde(7) && siyahUstunde(8)){
+        ileri(255);
+    }
+
+    motorstopcount = 2;
+}
+
+void trafikLambasiGecis(){
+    while(mesafeOlc() < 20){
+        delay(2000);
+    }
+    motorstopcount = 1;
+}
+
 void ileri(int hiz)
 {
     sagMotorIleri(hiz);
@@ -340,4 +420,22 @@ double mesafeOlc(void)
 
     double mesafe = (sure / 2) * 0.0343;
     return mesafe;
+}
+
+int beyazUstunde(int x){
+    if(analogRead(x) < esik[x]){
+        return TRUE;
+    }
+    else{
+        return FALSE;
+    }
+}
+
+int siyahUstunde(int x){
+    if(analogRead(x) > esik[x]){
+        return TRUE;
+    }
+    else{
+        return FALSE;
+    }
 }
