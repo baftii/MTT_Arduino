@@ -80,7 +80,7 @@ void loop()
                 MotorDurdur();
             }
             mesafe20count++;
-            if (motorstopcount == 0 && mesafe20count > 40)
+            if (motorstopcount == 0 && mesafe20count > 100)
             {
                 trafikLambasiGecis();
             }
@@ -90,7 +90,7 @@ void loop()
                 hareketsizEngelGecis();
             }
 
-            else if (motorstopcount = 2 && mesafe20count > 40)
+            else if (motorstopcount == 2 && mesafe20count > 100)
             {
                 asansorGecis();
             }
@@ -321,7 +321,7 @@ static void SolKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 {
     YerindeSolHareket(hiz);
     maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
-    if (millis() > (sure + 1000))
+    if (millis() > *sure + 1000)
     {
         *SolCheck = 0;
         *SagCheck = 1;
@@ -344,7 +344,7 @@ static void SagKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 {
     YerindeSagHareket(hiz);
     maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
-    if (millis() > (sure + 1000))
+    if (millis() > *sure + 1000)
     {
         *SolCheck = 1;
         *SagCheck = 0;
