@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include <stdbool.h>
+
 #define SagMotorHiz 1
 #define SolMotorHiz 2
 #define SagMotor1 3
@@ -11,42 +14,39 @@
 
 #define SensorSize 8
 
-#define TRUE 1
-#define FALSE 0
+#define baslangicHiz 150
 
 int minKal[SensorSize], maxKal[SensorSize], esik[SensorSize];
 
-int P, D, I, previousError, PIDvalue;
+int P, I, D, oncekiHata, PID_Degeri;
 
 int solHiz, sagHiz;
 
-int beyazcizgicount = 0;
-int beyazcizgitime = 0;
+uint8_t beyazcizgicount = 0;
+int32_t beyazcizgitime = 0;
 
-int motorstopcount = 0;
-int mesafe20count = 0;
+bool motorstopcount = false;
+uint16_t mesafe20count = 0;
 
-int trafikCheck = 0;
-int firstTurnCheck = 0;
-int hareketsizCheck = 0;
+bool trafikCheck = false;
+bool firstTurnCheck = false;
+bool hareketsizCheck = false;
 
-int parklockcheck = 0;
+bool parklockcheck = false;
 
-int asamaikigiris = 0;
-int asamaikicikis = 0;
+bool asamaikigiris = false;
+bool asamaikicikis = false;
 
-int asamaucgiris = 0;
-int asamauccikis = 0;
+bool asamaucgiris = false;
+bool asamauccikis = false;
 
-int elipsGiris = 0;
-int elipsCikis = 0;
-int elipsOrtaCheck = 0;
-int elipsOrtatime;
+bool elipsGiris = false;
+bool elipsCikis = false;
+bool elipsOrtaCheck = false;
+int32_t elipsOrtatime = 0;
 
-int asansorCheck = 0;
-int asansorSonrasiSapma = 0;
-
-int baslangicHiz = 150;
+bool asansorCheck = false;
+bool asansorSonrasiSapma = false;
 
 float Kp = 0;
 float Kd = 0;
@@ -208,17 +208,17 @@ void genelCizgiTakip(void)
 
 void cizgitakip(void)
 {
-    int error = (analogRead(6) - analogRead(3));
+    int hata = (analogRead(6) - analogRead(3));
 
-    P = error;
-    I = I + error;
-    D = error - previousError;
+    P = hata;
+    I = I + hata;
+    D = hata - oncekiHata;
 
-    PIDvalue = (Kp * P) + (Ki * I) + (Kd * D);
-    previousError = error;
+    PID_Degeri = (Kp * P) + (Ki * I) + (Kd * D);
+    oncekiHata = hata;
 
-    solHiz = baslangicHiz - PIDvalue;
-    sagHiz = baslangicHiz + PIDvalue;
+    solHiz = baslangicHiz - PID_Degeri;
+    sagHiz = baslangicHiz + PID_Degeri;
 
     if (solHiz > 255)
     {
@@ -278,7 +278,7 @@ void kalibrasyon(void)
             YerindeSolHareket(255);
             while(millis() > (time + 500))
             {
-                maxminKalbComp(&maxKal, &minKal, SensorSize);
+                maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
             }
             firsttime = 0;
             time = millis();
@@ -517,26 +517,26 @@ double mesafeOlc(void)
     return mesafe;
 }
 
-int beyazUstunde(int x)
+bool beyazUstunde(int x)
 {
     if (analogRead(x) < esik[x])
     {
-        return TRUE;
+        return true;
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
 
-int siyahUstunde(int x)
+bool siyahUstunde(int x)
 {
     if (analogRead(x) > esik[x])
     {
-        return TRUE;
+        return true;
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
