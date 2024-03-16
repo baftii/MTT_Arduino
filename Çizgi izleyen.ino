@@ -276,12 +276,12 @@ void kalibrasyon(void)
         if (firsttime == 1)
         {
             YerindeSolHareket(255);
-            maxminKalbComp(&maxKal[0], &minKal[0], 8);
-            if (millis() > (time + 500))
+            while(millis() > (time + 500))
             {
-                firsttime = 0;
-                time = millis();
+                maxminKalbComp(&maxKal, &minKal, SensorSize);
             }
+            firsttime = 0;
+            time = millis();
         }
 
         else
@@ -297,6 +297,8 @@ void kalibrasyon(void)
             }
         }
     }
+
+    
 
     MotorDurdur();
 
@@ -320,13 +322,14 @@ void kalibrasyon(void)
 static void SolKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 {
     YerindeSolHareket(hiz);
-    maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
-    if (millis() > *sure + 1000)
+    while(millis() > *sure + 1000)
     {
-        *SolCheck = 0;
-        *SagCheck = 1;
-        *sure = millis();
+        maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
     }
+
+    *SolCheck = 0;
+    *SagCheck = 1;
+    *sure = millis();
 }
 
 // Sağ Hareket Kalibrasyon Fonksiyonu
@@ -343,13 +346,14 @@ static void SolKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 static void SagKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 {
     YerindeSagHareket(hiz);
-    maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
-    if (millis() > *sure + 1000)
+    while(millis() > *sure + 1000)
     {
-        *SolCheck = 1;
-        *SagCheck = 0;
-        *sure = millis();
+        maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
     }
+        
+    *SolCheck = 1;
+    *SagCheck = 0;
+    *sure = millis();
 }
 
 // Maksimum Minimum değer bulma Fonksiyonu
