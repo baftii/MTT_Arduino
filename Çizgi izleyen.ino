@@ -16,7 +16,7 @@
 
 #define baslangicHiz 150
 
-uint8_t minKal[SensorSize], maxKal[SensorSize], esik[SensorSize];
+uint16_t minKal[SensorSize], maxKal[SensorSize], esik[SensorSize];
 
 int32_t P, I, D, oncekiHata, PID_Degeri;
 
@@ -368,7 +368,7 @@ static void SagKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 // Her sensörden veri almak. Bu verileri maksimum ve minimum değer arrayindeki değerler ile
 // karşılaştırıp minimum ve maksimum değerleri düzenlemek
 
-static void maxminKalbComp(uint8_t *max, uint8_t *min, int size)
+static void maxminKalbComp(uint16_t *max, uint16_t *min, int size)
 {
     for (int j = 0; j < size; j++)
     {
