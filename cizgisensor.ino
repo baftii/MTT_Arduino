@@ -10,11 +10,15 @@
 // Bu süre bitince led sönecek. Led söndükten sonra eğer butona basarsanız sensör çalışmaya başlayacak. Çalışmaya başladığında bağlandığınız LED yanıp sönmeye başlayacak.
 // Kalibre verilerini ve sensör verilerini seri moniterden görüntüleyebilirsiniz.
 
+// A7 pini sensördeki 8.'ye bağlanacak A0 ise 1.'ye bağlanacak
+
 // buradaki pinlerin ayarlanması lazım sayıların yerine
 #define SensorSize 8
 #define BUTTON 9
 #define LED_PIN 10
 #define LEDON_PIN 11
+
+int analogPins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
 
 uint8_t minKal[SensorSize], maxKal[SensorSize], esik[SensorSize], degerler[SensorSize];
 
@@ -76,27 +80,19 @@ void loop()
 
     Serial.println("");
 
-    // buradaki analogreadlerin içine pinler girilmesi lazım
-    degerler[0] = analogRead();
-    degerler[1] = analogRead();
-    degerler[2] = analogRead();
-    degerler[3] = analogRead();
-    degerler[4] = analogRead();
-    degerler[5] = analogRead();
-    degerler[6] = analogRead();
-    degerler[7] = analogRead();
-
     for (int i = SensorSize - 1; 0 <= i; i--)
     {
-        if (beyazUstunde(i))
-        {
-            Serial.print("B ");
-        }
+      degerler[i] = analogRead(analogPins[i]);
 
-        else
-        {
-            Serial.print("S ");
-        }
+      if (beyazUstunde(i))
+      {
+          Serial.print("B ");
+      }
+
+      else
+      {
+          Serial.print("S ");
+      }
     }
 
     Serial.print("|| ");
@@ -127,8 +123,8 @@ void kalibrasyon(void)
     digitalWrite(LEDON_PIN, HIGH);
     for (int i = 0; i < SensorSize; i++)
     {
-        minKal[i] = analogRead(i);
-        maxKal[i] = analogRead(i);
+        minKal[i] = analogRead(analogPins[i]);
+        maxKal[i] = analogRead(analogPins[i]);
     }
 
     time = millis();
@@ -148,7 +144,7 @@ void maxminKalbComp(uint8_t *max, uint8_t *min, int size)
 {
     for (int j = 0; j < size; j++)
     {
-        int temp = analogRead(j);
+        int temp = analogRead(analogPins[j]);
 
         if (*(min + j) > temp)
         {
