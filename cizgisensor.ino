@@ -7,7 +7,7 @@
 //
 // Algoritma şöyle başlangıçta kalibrasyon başlıyor. Kalibrasyon başlayınca bağladığınız led yanacak 10 saniye sürecek.
 // Bu süre boyunca çizgi sensörünü siyah veya beyaz çizgi üzerinde sağ sol yapmanız lazım. Her sensörden dışına içine tekrar tekrar girsin.
-// Bu süre bitince led sönecek. Led söndükten sonra eğer butona basarsanız sensör çalışmaya başlayacak.
+// Bu süre bitince led sönecek. Led söndükten sonra eğer butona basarsanız sensör çalışmaya başlayacak. Çalışmaya başladığında bağlandığınız LED yanıp sönmeye başlayacak.
 // Kalibre verilerini ve sensör verilerini seri moniterden görüntüleyebilirsiniz.
 
 // buradaki pinlerin ayarlanması lazım sayıların yerine
@@ -17,6 +17,9 @@
 #define LEDON_PIN 11
 
 uint8_t minKal[SensorSize], maxKal[SensorSize], esik[SensorSize], degerler[SensorSize];
+
+int time;
+bool ledCheck = true;
 
 void setup()
 {
@@ -47,10 +50,30 @@ void setup()
     while (!digitalRead(BUTTON))
     {
     }
+
+    digitalWrite(LED_PIN, HIGH);
+
+    time = millis() + 500;
 }
 
 void loop()
 {
+    if (millis() > time)
+    {
+        if (ledCheck == true)
+        {
+            ledCheck = false;
+            digitalWrite(LED_PIN, LOW);
+        }
+
+        else
+        {
+            ledCheck = true;
+            digitalWrite(LED_PIN, HIGH);
+        }
+        time = millis() + 500;
+    }
+
     Serial.println("");
 
     // buradaki analogreadlerin içine pinler girilmesi lazım
