@@ -4,6 +4,7 @@
 #define SensorSize 8
 #define BUTTON 9
 #define LED_PIN 10
+#define LEDON_PIN 11
 
 uint8_t minKal[SensorSize], maxKal[SensorSize], esik[SensorSize], degerler[SensorSize];
 
@@ -11,6 +12,8 @@ void setup()
 {
     Serial.begin(9600);
     pinMode(LED_PIN, OUTPUT);
+    pinMode(LEDON_PIN, OUTPUT);
+    pinMode(BUTTON, INPUT);
 
     Serial.println("Kalibrasyon Başladi.");
     digitalWrite(LED_PIN, HIGH);
@@ -87,6 +90,7 @@ void loop()
 void kalibrasyon(void)
 {
     int time;
+    digitalWrite(LEDON_PIN, HIGH);
     for (int i = 0; i < SensorSize; i++)
     {
         minKal[i] = analogRead(i);
@@ -95,7 +99,7 @@ void kalibrasyon(void)
 
     time = millis();
 
-    while (millis() < time + 5000)
+    while (millis() < time + 10000)
     {
         maxminKalbComp(maxKal[0], minKal[0], SensorSize);
     }
