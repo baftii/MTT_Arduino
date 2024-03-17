@@ -56,64 +56,59 @@ float Ki = 0;
 
 void setup()
 {
-    // put your setup code here, to run once:
-}
-
-void loop()
-{
     while (!digitalRead(Button))
     {
     }
     kalibrasyon();
     delay(5000);
+}
 
-    while (1)
+void loop()
+{
+    if (parked == 1)
     {
-        if (parked == 1)
+        while (1)
         {
-            while (1)
-            {
-                MotorDurdur();
-            }
+            MotorDurdur();
+        }
+    }
+
+    if ((beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8)) && (millis() > beyazcizgitime + 750))
+    {
+        if (firstTurnCheck == 0 || (asamaikicikis == 1 && asamauccikis == 0) || (elipsCikis == 1 && yayaCheck == 0))
+        {
+            beyazcizgicount++;
+            beyazcizgitime = millis();
+        }
+    }
+
+    if (mesafeOlc() < 20)
+    {
+        if (mesafe20count > 10)
+        {
+            MotorDurdur();
+        }
+        mesafe20count++;
+        if (motorstopcount == 0 && mesafe20count > 100)
+        {
+            trafikLambasiGecis();
         }
 
-        if ((beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8)) && (millis() > beyazcizgitime + 750))
+        else if (motorstopcount == 1 && mesafe20count > 30)
         {
-            if (firstTurnCheck == 0 || (asamaikicikis == 1 && asamauccikis == 0) || (elipsCikis == 1 && yayaCheck == 0))
-            {
-                beyazcizgicount++;
-                beyazcizgitime = millis();
-            }
+            hareketsizEngelGecis();
         }
 
-        if (mesafeOlc() < 20)
+        else if (motorstopcount == 2 && mesafe20count > 100)
         {
-            if (mesafe20count > 10)
-            {
-                MotorDurdur();
-            }
-            mesafe20count++;
-            if (motorstopcount == 0 && mesafe20count > 100)
-            {
-                trafikLambasiGecis();
-            }
-
-            else if (motorstopcount == 1 && mesafe20count > 30)
-            {
-                hareketsizEngelGecis();
-            }
-
-            else if (motorstopcount == 2 && mesafe20count > 100)
-            {
-                asansorGecis();
-            }
+            asansorGecis();
         }
+    }
 
-        else
-        {
-            mesafe20count = 0;
-            genelCizgiTakip();
-        }
+    else
+    {
+        mesafe20count = 0;
+        genelCizgiTakip();
     }
 }
 
