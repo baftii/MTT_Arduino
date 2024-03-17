@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// buradaki pinlerin ayarlanması lazım sayıların yerine
 #define SensorSize 8
 #define BUTTON 9
 #define LED_PIN 10
@@ -43,6 +44,7 @@ void loop()
 {
     Serial.println("");
 
+    // buradaki analogreadlerin içine pinler girilmesi lazım
     degerler[0] = analogRead();
     degerler[1] = analogRead();
     degerler[2] = analogRead();
