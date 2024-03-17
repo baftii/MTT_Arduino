@@ -78,6 +78,8 @@ void loop()
     }
 
     Serial.println(" ");
+
+    delay(50);
 }
 
 void kalibrasyon(void)
