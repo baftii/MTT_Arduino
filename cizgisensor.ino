@@ -2,6 +2,8 @@
 #include <stdbool.h>
 
 #define SensorSize 8
+#define BUTTON 9
+#define LED_PIN 10
 
 uint8_t minKal[SensorSize], maxKal[SensorSize], esik[SensorSize], degerler[SensorSize];
 
