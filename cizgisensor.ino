@@ -1,6 +1,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// Kod şöyle çalışıyor ihtiyacımız olan 1 tane led 1 tane buton
+// Bu led ve butonun pinlerini aşağıdaki define kısmında değiştirmeniz lazım
+// ledon_pin çizgi sensöründe ledon pinine bağlı pin olacak
+//
+// Algoritma şöyle başlangıçta kalibrasyon başlıyor. Kalibrasyon başlayınca bağladığınız led yanacak 10 saniye sürecek.
+// Bu süre boyunca çizgi sensörünü siyah veya beyaz çizgi üzerinde sağ sol yapmanız lazım. Her sensörden dışına içine tekrar tekrar girsin.
+// Bu süre bitince led sönecek. Led söndükten sonra eğer butona basarsanız sensör çalışmaya başlayacak.
+// Kalibre verilerini ve sensör verilerini seri moniterden görüntüleyebilirsiniz.
+
 // buradaki pinlerin ayarlanması lazım sayıların yerine
 #define SensorSize 8
 #define BUTTON 9
