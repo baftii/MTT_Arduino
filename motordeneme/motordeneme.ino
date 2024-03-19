@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define MOT1_IN1 1
-#define MOT1_IN2 2
-#define MOT1_EN 3 // PWM
-#define MOT2_IN1 4
-#define MOT2_IN2 5
-#define MOT2_EN 6 // PWM
+#define MOT1_EN 11 // PWM
+#define MOT1_IN1 12
+#define MOT1_IN2 8
 
-#define MOT1_LED 7
-#define MOT2_LED 8
+#define MOT2_IN1 7
+#define MOT2_IN2 4
+#define MOT2_EN 3 // PWM
+
+#define MOT1_LED 10
+#define MOT2_LED 9
 
 // Motoru test etmek için 2 tane led, motor sürücü ve 2 motor lazım
 // yukarıdaki pinleri ayarladıktan sonra, motorlar sırasıyla ileri, geri, yerindesag, yerinde sol, sag,
@@ -42,71 +43,7 @@ void setup()
 
 void loop()
 {
-    ileri(255);
-    digitalWrite(MOT1_LED, HIGH);
-    digitalWrite(MOT2_LED, HIGH);
-
-    delay(2000);
-
-    MotorDurdur();
-    digitalWrite(MOT1_LED, LOW);
-    digitalWrite(MOT2_LED, LOW);
-    delay(500);
-
-    geri(255);
-    digitalWrite(MOT1_LED, LOW);
-    digitalWrite(MOT2_LED, LOW);
-
-    delay(2000);
-
-    MotorDurdur();
-    digitalWrite(MOT1_LED, LOW);
-    digitalWrite(MOT2_LED, LOW);
-    delay(500);
-
-    YerindeSagHareket(255);
-    digitalWrite(MOT1_LED, HIGH);
-    digitalWrite(MOT2_LED, HIGH);
-
-    delay(2000);
-
-    MotorDurdur();
-    digitalWrite(MOT1_LED, LOW);
-    digitalWrite(MOT2_LED, LOW);
-    delay(500);
-
-    YerindeSolHareket(255);
-    digitalWrite(MOT1_LED, HIGH);
-    digitalWrite(MOT2_LED, HIGH);
-
-    delay(2000);
-
-    MotorDurdur();
-    digitalWrite(MOT1_LED, LOW);
-    digitalWrite(MOT2_LED, LOW);
-    delay(500);
-
-    SagHareket(255);
-    digitalWrite(MOT1_LED, HIGH);
-    digitalWrite(MOT2_LED, LOW);
-
-    delay(2000);
-
-    MotorDurdur();
-    digitalWrite(MOT1_LED, LOW);
-    digitalWrite(MOT2_LED, LOW);
-    delay(500);
-
-    SolHareket(255);
-    digitalWrite(MOT1_LED, LOW);
-    digitalWrite(MOT2_LED, HIGH);
-
-    delay(2000);
-
-    MotorDurdur();
-    digitalWrite(MOT1_LED, LOW);
-    digitalWrite(MOT2_LED, LOW);
-    delay(500);
+ileri(255);
 }
 
 void ileri(int hiz)

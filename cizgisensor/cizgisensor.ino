@@ -14,9 +14,9 @@
 
 // buradaki pinlerin ayarlanması lazım sayıların yerine
 #define SensorSize 8
-#define BUTTON 9
-#define LED_PIN 10
-#define LEDON_PIN 11
+#define BUTTON A8
+#define LED_PIN B3
+#define LEDON_PIN A15
 
 int analogPins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
 
