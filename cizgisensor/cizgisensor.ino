@@ -14,15 +14,15 @@
 
 // buradaki pinlerin ayarlanması lazım sayıların yerine
 #define SensorSize 8
-#define BUTTON A8
-#define LED_PIN B3
-#define LEDON_PIN A15
+#define BUTTON D4
+#define LED_PIN D3
+#define LEDON_PIN A8
 
 int analogPins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
 
 uint8_t minKal[SensorSize], maxKal[SensorSize], esik[SensorSize], degerler[SensorSize];
 
-int time;
+int timefor;
 bool ledCheck = true;
 
 void setup()
@@ -57,12 +57,12 @@ void setup()
 
     digitalWrite(LED_PIN, HIGH);
 
-    time = millis() + 500;
+    timefor = millis() + 500;
 }
 
 void loop()
 {
-    if (millis() > time)
+    if (millis() > timefor)
     {
         if (ledCheck == true)
         {
@@ -75,7 +75,7 @@ void loop()
             ledCheck = true;
             digitalWrite(LED_PIN, HIGH);
         }
-        time = millis() + 500;
+        timefor = millis() + 500;
     }
 
     Serial.println("");
@@ -131,7 +131,7 @@ void kalibrasyon(void)
 
     while (millis() < time + 10000)
     {
-        maxminKalbComp(maxKal[0], minKal[0], SensorSize);
+        maxminKalbComp(maxKal, minKal, SensorSize);
     }
 
     for (int i = 0; i < 8; i++)
