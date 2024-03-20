@@ -3,7 +3,6 @@
 
 // Kod şöyle çalışıyor ihtiyacımız olan 1 tane led 1 tane buton
 // Bu led ve butonun pinlerini aşağıdaki define kısmında değiştirmeniz lazım
-// ledon_pin çizgi sensöründe ledon pinine bağlı pin olacak
 //
 // Algoritma şöyle başlangıçta kalibrasyon başlıyor. Kalibrasyon başlayınca bağladığınız led yanacak 10 saniye sürecek.
 // Bu süre boyunca çizgi sensörünü siyah veya beyaz çizgi üzerinde sağ sol yapmanız lazım. Her sensörden dışına içine tekrar tekrar girsin.
@@ -14,9 +13,8 @@
 
 // buradaki pinlerin ayarlanması lazım sayıların yerine
 #define SensorSize 8
-#define BUTTON D4
-#define LED_PIN D3
-#define LEDON_PIN A8
+#define BUTTON D15
+#define LED_PIN D8
 
 int analogPins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
 
@@ -29,7 +27,6 @@ void setup()
 {
     Serial.begin(9600);
     pinMode(LED_PIN, OUTPUT);
-    pinMode(LEDON_PIN, OUTPUT);
     pinMode(BUTTON, INPUT);
 
     Serial.println("Kalibrasyon Başladi.");
@@ -83,6 +80,7 @@ void loop()
     for (int i = SensorSize - 1; 0 <= i; i--)
     {
       degerler[i] = analogRead(analogPins[i]);
+      degerler[i] = map(degerler[i], minKal[i], maxKal[i], 0, 1000);
 
       if (beyazUstunde(i))
       {
@@ -104,7 +102,7 @@ void loop()
         Serial.print(" ");
     }
 
-    Serial.print("|| ");
+    Serial.print("|| Eşik: ");
 
     for (int i = SensorSize - 1; 0 <= i; i--)
     {
@@ -119,24 +117,25 @@ void loop()
 
 void kalibrasyon(void)
 {
-    int time;
-    digitalWrite(LEDON_PIN, HIGH);
+    int sure;
     for (int i = 0; i < SensorSize; i++)
     {
         minKal[i] = analogRead(analogPins[i]);
         maxKal[i] = analogRead(analogPins[i]);
     }
 
-    time = millis();
+    sure = millis();
 
-    while (millis() < time + 10000)
+    while (millis() < sure + 10000)
     {
         maxminKalbComp(maxKal, minKal, SensorSize);
+        delay(50);
     }
 
     for (int i = 0; i < 8; i++)
     {
         esik[i] = (maxKal[i] + minKal[i]) / 2;
+        esik[i] = map(esik[i], minKal[i], maxKal[i], 0, 1000);
     }
 }
 
@@ -146,14 +145,14 @@ void maxminKalbComp(uint8_t *max, uint8_t *min, int size)
     {
         int temp = analogRead(analogPins[j]);
 
-        if (*(min + j) > temp)
+        if (min[j] > temp)
         {
-            *(min + j) = temp;
+            min[j] = temp;
         }
 
-        if (*(max + j) < temp)
+        if (max[j] < temp)
         {
-            *(max + j) = temp;
+            max[j] = temp;
         }
     }
 }
