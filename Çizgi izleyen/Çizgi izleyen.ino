@@ -16,7 +16,7 @@
 
 #define baslangicHiz 150
 
-uint16_t minKal[SensorSize], maxKal[SensorSize], esik[SensorSize];
+uint8_t minKal[SensorSize], maxKal[SensorSize], esik[SensorSize];
 
 int32_t P, I, D, oncekiHata, PID_Degeri;
 
@@ -24,6 +24,14 @@ uint16_t solHiz, sagHiz;
 
 uint8_t beyazcizgicount = 0;
 int32_t beyazcizgitime = 0;
+
+bool parked = false;
+
+bool park1L = false;
+bool park1R = false;
+
+bool park2L = false;
+bool park2R = false;
 
 bool motorstopcount = false;
 uint16_t mesafe20count = 0;
@@ -45,69 +53,83 @@ bool elipsCikis = false;
 bool elipsOrtaCheck = false;
 int32_t elipsOrtatime = 0;
 
+bool yayaCheck = false;
+bool yayaSonrasiSapma = false;
+
 bool asansorCheck = false;
 bool asansorSonrasiSapma = false;
 
-float Kp = 0;
-float Kd = 0;
-float Ki = 0;
+float Kp;
+float Kd;
+float Ki;
 
 void setup()
-{
-    // put your setup code here, to run once:
-}
-
-void loop()
 {
     while (!digitalRead(Button))
     {
     }
     kalibrasyon();
     delay(5000);
+}
 
-    while (1)
+void loop()
+{
+    if (parked == 1)
     {
-        if ((beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8)) && (millis() > beyazcizgitime + 750))
+        while (1)
+        {
+            MotorDurdur();
+        }
+    }
+
+    if ((beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8)) && (millis() > beyazcizgitime + 750))
+    {
+        if (firstTurnCheck == 0 || (asamaikicikis == 1 && asamauccikis == 0) || (elipsCikis == 1 && yayaCheck == 0))
         {
             beyazcizgicount++;
             beyazcizgitime = millis();
         }
+    }
 
-        if (mesafeOlc() < 20)
+    if (mesafeOlc() < 20)
+    {
+        if (mesafe20count > 10)
         {
-            if (mesafe20count > 10)
-            {
-                MotorDurdur();
-            }
-            mesafe20count++;
-            if (motorstopcount == 0 && mesafe20count > 100)
-            {
-                trafikLambasiGecis();
-            }
-
-            else if (motorstopcount == 1 && mesafe20count > 30)
-            {
-                hareketsizEngelGecis();
-            }
-
-            else if (motorstopcount == 2 && mesafe20count > 100)
-            {
-                asansorGecis();
-            }
+            MotorDurdur();
+        }
+        mesafe20count++;
+        if (motorstopcount == 0 && mesafe20count > 100)
+        {
+            trafikLambasiGecis();
         }
 
-        else
+        else if (motorstopcount == 1 && mesafe20count > 30)
         {
-            mesafe20count = 0;
-            genelCizgiTakip();
+            hareketsizEngelGecis();
         }
+
+        else if (motorstopcount == 2 && mesafe20count > 100)
+        {
+            asansorGecis();
+        }
+
+        else if (motorstopcount == 3 && mesafe20count > 100)
+        {
+            yayaGecis();
+        }
+    }
+
+    else
+    {
+        mesafe20count = 0;
+        genelCizgiTakip();
     }
 }
 
 void genelCizgiTakip(void)
 {
     // İlk sağ dönüş
-    if (firstTurnCheck == 0 && beyazcizgicount == 1 && (beyazUstunde(1) && (beyazUstunde(4) || beyazUstunde(3)) && siyahUstunde(8)))
+    if (firstTurnCheck == false && beyazcizgicount == 1 && (beyazUstunde(1) && (beyazUstunde(4) || beyazUstunde(3)) && siyahUstunde(8)))
     {
         YerindeSagHareket(255);
         delay(100);
@@ -115,7 +137,7 @@ void genelCizgiTakip(void)
     }
 
     // 2. Aşama sağ sapma giriş
-    else if ((beyazUstunde(6) && beyazUstunde(3)) && beyazcizgicount == 1 && (siyahUstunde(5) || siyahUstunde(4)) && asamaikigiris == 0 && trafikCheck == 1)
+    else if ((beyazUstunde(6) && beyazUstunde(3)) && beyazcizgicount == 1 && (siyahUstunde(5) || siyahUstunde(4)) && asamaikigiris == false && trafikCheck == true)
     {
         YerindeSagHareket(150);
         delay(200);
@@ -123,7 +145,7 @@ void genelCizgiTakip(void)
     }
 
     // 2. Aşama Sol sapma çıkış
-    else if (((beyazUstunde(6) || beyazUstunde(5)) && beyazUstunde(4) && beyazUstunde(3)) && asamaikicikis == 0 && hareketsizCheck == 1)
+    else if (((beyazUstunde(6) || beyazUstunde(5)) && beyazUstunde(4) && beyazUstunde(3)) && asamaikicikis == false && hareketsizCheck == true)
     {
         YerindeSolHareket(255);
         delay(200);
@@ -131,7 +153,7 @@ void genelCizgiTakip(void)
     }
 
     // 3. Aşama sol sapma giriş
-    else if ((beyazUstunde(6) && beyazUstunde(5) && beyazUstunde(4)) && beyazcizgicount == 2 && (siyahUstunde(2) && siyahUstunde(1)) && asamaucgiris == 0 && asamaikicikis == 1)
+    else if ((beyazUstunde(6) && beyazUstunde(5) && beyazUstunde(4)) && beyazcizgicount == 2 && (siyahUstunde(2) && siyahUstunde(1)) && asamaucgiris == false && asamaikicikis == true)
     {
         YerindeSolHareket(150);
         delay(200);
@@ -139,7 +161,7 @@ void genelCizgiTakip(void)
     }
 
     // 3. Aşama park durumu
-    else if (beyazcizgicount == 4 && parklockcheck == 0 && asamaucgiris == 1 && asamauccikis == 0)
+    else if (beyazcizgicount == 4 && parklockcheck == false && asamaucgiris == true && asamauccikis == false)
     {
         MotorDurdur();
         geri(100);
@@ -152,7 +174,7 @@ void genelCizgiTakip(void)
     }
 
     // 3. Aşama sol sapma çıkış
-    else if (((beyazUstunde(6) || beyazUstunde(5)) && beyazUstunde(2) && beyazUstunde(3)) && asamauccikis == 0 && asamaucgiris == 1)
+    else if (((beyazUstunde(6) || beyazUstunde(5)) && beyazUstunde(2) && beyazUstunde(3)) && asamauccikis == false && asamaucgiris == true)
     {
         YerindeSolHareket(150);
         delay(200);
@@ -160,7 +182,7 @@ void genelCizgiTakip(void)
     }
 
     // Çember giriş
-    else if ((beyazUstunde(2) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(7)) && asamauccikis == 1 && elipsGiris == 0)
+    else if ((beyazUstunde(2) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(7)) && asamauccikis == true && elipsGiris == false)
     {
         YerindeSagHareket(150);
         delay(200);
@@ -168,14 +190,14 @@ void genelCizgiTakip(void)
     }
 
     // Çember Orta sapma engelleme
-    else if ((beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3)) && elipsGiris == 1 && elipsOrtaCheck == 0)
+    else if ((beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3)) && elipsGiris == true && elipsOrtaCheck == false)
     {
         elipsOrtatime = millis();
         elipsOrtaCheck = 1;
     }
 
     // Çember çıkış
-    else if ((beyazUstunde(4) || beyazUstunde(5) && (beyazUstunde(6) && beyazUstunde(7))) && elipsGiris == 1 && elipsCikis == 0 && elipsOrtaCheck == 1 && millis() > elipsOrtatime + 750)
+    else if ((beyazUstunde(4) || beyazUstunde(5) && (beyazUstunde(6) && beyazUstunde(7))) && elipsGiris == true && elipsCikis == false && elipsOrtaCheck == true && millis() > elipsOrtatime + 750)
     {
         YerindeSagHareket(255);
         delay(200);
@@ -183,11 +205,24 @@ void genelCizgiTakip(void)
     }
 
     // Asansör sonrası sapma
-    else if (((beyazUstunde(4) || beyazUstunde(5)) && beyazUstunde(2)) && asansorCheck == 1 && asansorSonrasiSapma == 0)
+    else if (((beyazUstunde(4) || beyazUstunde(5)) && beyazUstunde(2)) && asansorCheck == true && asansorSonrasiSapma == false)
     {
         asansorSonrasiSapma = 1;
         ileri(255);
         delay(200);
+    }
+
+    // Yaya sonrası sapma
+    else if (((beyazUstunde(4) || beyazUstunde(5)) && beyazUstunde(2)) && yayaCheck == true && yayaSonrasiSapma == false)
+    {
+        yayaSonrasiSapma = 1;
+        ileri(255);
+        delay(200);
+    }
+
+    else if (beyazcizgicount == 8)
+    {
+        parkAlani();
     }
 
     // Normal çizgi takip
@@ -276,7 +311,7 @@ void kalibrasyon(void)
         if (firsttime == 1)
         {
             YerindeSolHareket(255);
-            while(millis() > (time + 500))
+            while (millis() > (time + 500))
             {
                 maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
             }
@@ -297,8 +332,6 @@ void kalibrasyon(void)
             }
         }
     }
-
-    
 
     MotorDurdur();
 
@@ -322,7 +355,7 @@ void kalibrasyon(void)
 static void SolKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 {
     YerindeSolHareket(hiz);
-    while(millis() > *sure + 1000)
+    while (millis() > *sure + 1000)
     {
         maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
     }
@@ -346,11 +379,11 @@ static void SolKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 static void SagKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 {
     YerindeSagHareket(hiz);
-    while(millis() > *sure + 1000)
+    while (millis() > *sure + 1000)
     {
         maxminKalbComp(&maxKal[0], &minKal[0], SensorSize);
     }
-        
+
     *SolCheck = 1;
     *SagCheck = 0;
     *sure = millis();
@@ -368,7 +401,7 @@ static void SagKalb(int hiz, int *SolCheck, int *SagCheck, int *sure)
 // Her sensörden veri almak. Bu verileri maksimum ve minimum değer arrayindeki değerler ile
 // karşılaştırıp minimum ve maksimum değerleri düzenlemek
 
-static void maxminKalbComp(uint16_t *max, uint16_t *min, int size)
+static void maxminKalbComp(uint8_t *max, uint8_t *min, int size)
 {
     for (int j = 0; j < size; j++)
     {
@@ -420,6 +453,129 @@ void YerindeSagHareket(int hiz)
     solMotorIleri(hiz);
 }
 
+void parkAlani(void)
+{
+    MotorDurdur();
+    delay(100);
+    int parkTime = millis();
+    while (millis() > parkTime + 1000)
+    {
+        YerindeSagHareket(150);
+        if (mesafeOlc() < 20)
+        {
+            park1R = 1;
+        }
+    }
+    if (park1R == 1)
+    {
+        parkTime = millis();
+        while (millis() > parkTime + 1000)
+        {
+            YerindeSolHareket(150);
+        }
+        parkTime = millis();
+        while (millis() > parkTime + 1000)
+        {
+            YerindeSolHareket(150);
+            if (mesafeOlc() < 20)
+            {
+                park1L = 1;
+            }
+        }
+
+        if (park1L == 1)
+        {
+            parkTime = millis();
+            while (millis() > parkTime + 1000)
+            {
+                YerindeSagHareket(150);
+            }
+            ileri(150);
+            delay(300);
+            while (!(beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8)))
+            {
+            }
+            MotorDurdur();
+            parkTime = millis();
+            while (millis() > parkTime + 1000)
+            {
+                YerindeSagHareket(150);
+                if (mesafeOlc() < 20)
+                {
+                    park2R = 1;
+                }
+            }
+
+            if (park2R == 1)
+            {
+                parkTime = millis();
+                while (millis() > parkTime + 1000)
+                {
+                    YerindeSolHareket(150);
+                }
+
+                parkTime = millis();
+                while (millis() > parkTime + 1000)
+                {
+                    YerindeSolHareket(150);
+                    if (mesafeOlc() < 20)
+                    {
+                        park2R = 1;
+                    }
+                }
+
+                if (park2R == 0)
+                {
+                    while (!(beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8)))
+                    {
+                        cizgitakip();
+                    }
+                    geri(150);
+                    delay(150);
+                    MotorDurdur();
+                    parked = 1;
+                }
+            }
+
+            else
+            {
+                while (!(beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8)))
+                {
+                    cizgitakip();
+                }
+                geri(150);
+                delay(150);
+                MotorDurdur();
+                parked = 1;
+            }
+        }
+
+        else
+        {
+            while (!(beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8)))
+            {
+                cizgitakip();
+            }
+            geri(150);
+            delay(150);
+            MotorDurdur();
+            parked = 1;
+        }
+    }
+
+    else
+    {
+        while (!(beyazUstunde(1) && beyazUstunde(2) && beyazUstunde(3) && beyazUstunde(4) && beyazUstunde(5) && beyazUstunde(6) && beyazUstunde(7) && beyazUstunde(8)))
+        {
+            cizgitakip();
+        }
+        geri(150);
+        delay(150);
+        MotorDurdur();
+        parked = 1;
+    }
+}
+
 void hareketsizEngelGecis(void)
 {
     YerindeSolHareket(255);
@@ -455,6 +611,16 @@ void trafikLambasiGecis(void)
     }
     motorstopcount = 1;
     trafikCheck = 1;
+}
+
+void yayaGecis(void)
+{
+    while (mesafeOlc() < 20)
+    {
+        delay(2000);
+    }
+    motorstopcount = 4;
+    yayaCheck = 1;
 }
 
 void ileri(int hiz)
